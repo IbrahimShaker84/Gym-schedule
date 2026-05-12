@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جدول التمرين الأسبوعي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0d0d14;
+    font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+    color: #f0f0f5;
+    direction: rtl;
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #0d0d14; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+  .header {
+    background: linear-gradient(180deg, #1a1a2e 0%, #0d0d14 100%);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 28px 20px 20px;
+    text-align: center;
+  }
+  .header-tag {
+    display: inline-block;
+    background: rgba(240,180,41,0.1);
+    border: 1px solid rgba(240,180,41,0.25);
+    color: #f0b429;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .header h1 {
+    font-size: clamp(22px, 5vw, 38px);
+    font-weight: 900;
+    background: linear-gradient(135deg, #f0b429, #e85d04);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+  .header p { color: #666; font-size: 13px; }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    padding: 14px 14px 0;
+    overflow-x: auto;
+    background: #111118;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 10px 16px;
+    border-radius: 10px 10px 0 0;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    background: transparent;
+    color: #666;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab-btn.active { color: #fff; }
+
+  .content { max-width: 720px; margin: 0 auto; padding: 20px 14px 50px; }
+
+  .day-title-card {
+    border-radius: 16px; padding: 18px 20px; margin-bottom: 18px;
+    display: flex; align-items: center; gap: 14px; border: 1px solid;
+  }
+  .day-emoji { font-size: 34px; flex-shrink: 0; }
+  .day-text { flex: 1; }
+  .day-text h2 { font-size: 20px; font-weight: 900; margin-bottom: 3px; }
+  .day-text p { color: #888; font-size: 12px; }
+  .day-tag { color: #fff; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; flex-shrink: 0; }
+
+  .ex-card {
+    background: #16161f; border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; margin-bottom: 10px; overflow: hidden; transition: border-color 0.2s;
+  }
+  .ex-header {
+    padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+    cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+  }
+  .ex-num {
+    width: 32px; height: 32px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 13px;
+    font-weight: 900; flex-shrink: 0; border: 1px solid;
+  }
+  .ex-info { flex: 1; min-width: 0; }
+  .ex-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 3px; }
+  .ex-name { font-weight: 800; font-size: 14px; }
+  .equip-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; border: 1px solid; }
+  .ex-name-ar { color: #888; font-size: 11px; margin-bottom: 6px; }
+  .stats-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .stat-pill {
+    font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 20px;
+    background: rgba(255,255,255,0.05); color: #aaa; border: 1px solid rgba(255,255,255,0.08);
+  }
+  .ex-arrow { color: #444; font-size: 20px; flex-shrink: 0; transition: transform 0.2s; line-height: 1; }
+  .ex-arrow.open { transform: rotate(180deg); }
+
+  .ex-body { display: none; border-top: 1px solid rgba(255,255,255,0.06); padding: 14px 16px; background: #12121a; }
+  .ex-body.open { display: block; }
+
+  .tip-box {
+    background: rgba(240,180,41,0.06); border: 1px solid rgba(240,180,41,0.15);
+    border-radius: 10px; padding: 12px 14px; margin-bottom: 12px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .tip-box span { font-size: 18px; flex-shrink: 0; }
+  .tip-box p { font-size: 12px; color: #ccc; line-height: 1.7; }
+
+  .yt-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: #FF0000; color: #fff; border-radius: 10px; padding: 12px 18px;
+    font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 13px;
+    text-decoration: none; transition: opacity 0.2s; -webkit-tap-highlight-color: transparent;
+  }
+  .yt-btn:hover { opacity: 0.85; }
+  .yt-btn:active { opacity: 0.7; }
+
+  .legend { background: #16161f; border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 14px 16px; margin-top: 18px; }
+  .legend-title { font-size: 11px; color: #666; margin-bottom: 10px; font-weight: 700; }
+  .legend-items { display: flex; gap: 8px; flex-wrap: wrap; }
+  .legend-item { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; border: 1px solid; }
+
+  .tips-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+  .tip-card { background: #16161f; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px; display: flex; gap: 10px; align-items: flex-start; }
+  .tip-card-icon { font-size: 20px; flex-shrink: 0; }
+  .tip-card-title { font-size: 12px; font-weight: 700; color: #f0b429; margin-bottom: 3px; }
+  .tip-card-text { font-size: 11px; color: #888; line-height: 1.5; }
+
+  @media (max-width: 400px) {
+    .tips-grid { grid-template-columns: 1fr; }
+    .ex-name { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-tag">💪 WEEKLY GYM PLAN</div>
+  <h1>جدولك الأسبوعي للجيم</h1>
+  <p>مبتدئ · ضخامة + تنشيف · 5 أيام · مخصص لأجهزة جيمك</p>
+</div>
+
+<div class="tabs" id="tabs"></div>
+<div class="content" id="content"></div>
+
+<script>
+const equipColor = {
+  "ماكينة":      "#27ae60",
+  "كابل":        "#e74c3c",
+  "دمبل":        "#3498db",
+  "بار":         "#e67e22",
+  "بدون أجهزة": "#95a5a6"
+};
+
+const days = [
+  {
+    id:"sat", label:"🏋️ السبت", title:"صدر + تراي", subtitle:"Chest & Triceps",
+    emoji:"🏋️", color:"#e74c3c", bg:"rgba(231,76,60,0.08)", border:"rgba(231,76,60,0.3)", tag:"يوم ١",
+    exercises:[
+      { name:"Chest Press Machine", nameAr:"ماكينة ضغط الصدر", equipment:"ماكينة", sets:"4 سيت", reps:"10-12 تكرار", rest:"60 ث راحة", muscle:"الصدر الكامل", tip:"ضبط المقعد مهم جداً: المقابض تكون على مستوى الصدر الأوسط. ادفع للأمام بالكوع مش بالرسغ. ارجع ببطء لأقصى تمدد.", youtube:"https://www.youtube.com/watch?v=xUm0BiZCX_I" },
+      { name:"Incline Chest Press Machine", nameAr:"ماكينة ضغط الصدر المائل", equipment:"ماكينة", sets:"3 سيت", reps:"12 تكرار", rest:"60 ث راحة", muscle:"الصدر العلوي", tip:"موجود في جيمك — يشتغل على الصدر العلوي بشكل ممتاز. لا تقفل المرفق بالكامل فوق. ركز على الإحساس بالصدر العلوي وليس الكتف.", youtube:"https://www.youtube.com/watch?v=8iPEnn-ltC8" },
+      { name:"Cable Crossover — High to Low", nameAr:"تقاطع الكابل من الأعلى للأسفل", equipment:"كابل", sets:"3 سيت", reps:"15 تكرار", rest:"45 ث راحة", muscle:"عزل وتحديد الصدر", tip:"استخدم الـ Functional Trainer. الكابلات من الأعلى — اجمع يديك أمام البطن. الحركة كأنك تعانق شجرة. ارجع ببطء وتحكم بالوزن.", youtube:"https://www.youtube.com/watch?v=taI4XduLpTk" },
+      { name:"Tricep Pushdown — Rope", nameAr:"ضغط التراي بالحبل على الكابل", equipment:"كابل", sets:"3 سيت", reps:"12-15 تكرار", rest:"45 ث راحة", muscle:"التراي — الرأس الجانبي", tip:"استخدم الحبل على الكابل العلوي. عند النهاية افتح الحبلين للخارج قليلاً لتعزيز العزل. المرفق ثابت تماماً بجانب الجسم — لا يتحرك.", youtube:"https://www.youtube.com/watch?v=kiuVA0gs3EI" },
+      { name:"Cable Overhead Tricep Extension", nameAr:"تمديد التراي فوق الرأس بالكابل", equipment:"كابل", sets:"3 سيت", reps:"12 تكرار", rest:"45 ث راحة", muscle:"الرأس الطويل للتراي", tip:"الكابل من الأسفل — استدر بظهرك للماكينة وادفع للأمام. الرأس الطويل للتراي يحتاج تمدد كامل وهذا التمرين هو الأفضل له للضخامة.", youtube:"https://www.youtube.com/watch?v=BJnBqSmCHaY" }
+    ]
+  },
+  {
+    id:"sun", label:"💪 الأحد", title:"ظهر + باي", subtitle:"Back & Biceps",
+    emoji:"💪", color:"#27ae60", bg:"rgba(39,174,96,0.08)", border:"rgba(39,174,96,0.3)", tag:"يوم ٢",
+    exercises:[
+      { name:"Lat Pulldown Machine", nameAr:"ماكينة سحب الظهر للأسفل", equipment:"ماكينة", sets:"4 سيت", reps:"10-12 تكرار", rest:"60 ث راحة", muscle:"عرض الظهر — اللاتيسيموس", tip:"اسحب للصدر مش للرقبة. ميّل الجسم 15 درجة للخلف وافتح الصدر — هذا يزيد نطاق الحركة ويشغّل الظهر أكثر.", youtube:"https://www.youtube.com/watch?v=CAwf7n6Luuc" },
+      { name:"Seated Row Machine", nameAr:"ماكينة الرواينج الجالس", equipment:"ماكينة", sets:"3 سيت", reps:"12 تكرار", rest:"60 ث راحة", muscle:"سماكة الظهر الأوسط", tip:"اسحب للسرة — عند نهاية الحركة اضغط لوح الكتفين للخلف وثبّت ثانية. الظهر مستقيم طول الوقت. لا تميل للخلف.", youtube:"https://www.youtube.com/watch?v=GZbfZ033f74" },
+      { name:"Cable Straight Arm Pulldown", nameAr:"سحب الكابل بالذراع المستقيمة", equipment:"كابل", sets:"3 سيت", reps:"15 تكرار", rest:"45 ث راحة", muscle:"اللاتيسيموس — عزل كامل", tip:"استخدم الـ Functional Trainer. الذراعان مستقيمتان طول الوقت — اسحب من الأعلى للخصر. يعلّمك تحسس عضلة الظهر وهو مثالي للمبتدئ.", youtube:"https://www.youtube.com/watch?v=BLp3MxZMHMQ" },
+      { name:"Preacher Curl Machine", nameAr:"ماكينة البريتشر كيرل", equipment:"ماكينة", sets:"3 سيت", reps:"12 تكرار", rest:"45 ث راحة", muscle:"الباي — عزل كامل", tip:"جيمك فيه بنش Preacher ممتاز. الذراع ثابتة على الوسادة — الحركة من الرسغ للكتف فقط. لا ترفع الكتف عند السحب. ارجع ببطء.", youtube:"https://www.youtube.com/watch?v=fIWP-FRFNU0" },
+      { name:"Cable Bicep Curl", nameAr:"كيرل الباي بالكابل", equipment:"كابل", sets:"3 سيت", reps:"12-15 تكرار", rest:"45 ث راحة", muscle:"الباي — تحت ضغط ثابت", tip:"الكابل يبقي الضغط على الباي طول الحركة بعكس الدمبل. استخدم البار المستقيم أو EZ Bar على الكابل السفلي. المرفق ثابت.", youtube:"https://www.youtube.com/watch?v=av7-8igSXTs" }
+    ]
+  },
+  {
+    id:"mon", label:"🏃 الاثنين", title:"كارديو + كور", subtitle:"Cardio & Core",
+    emoji:"🏃", color:"#1abc9c", bg:"rgba(26,188,156,0.08)", border:"rgba(26,188,156,0.3)", tag:"يوم ٣",
+    exercises:[
+      { name:"Incline Treadmill Walk", nameAr:"مشي التريدميل بميل", equipment:"ماكينة", sets:"—", reps:"25 دقيقة", rest:"—", muscle:"حرق دهون — تعافي نشط", tip:"ميل 8-10% · سرعة 5.5-6 كم/ساعة. الأفضل لحرق الدهون بدون تعب عضلي. لا تمسك الدرابزين — خلّي الجسم يتكيّف ويحرق أكثر.", youtube:"https://www.youtube.com/watch?v=FP4jBT34XHs" },
+      { name:"Cable Crunch", nameAr:"كرانش البطن بالكابل", equipment:"كابل", sets:"3 سيت", reps:"15-20 تكرار", rest:"30 ث راحة", muscle:"البطن العلوي", tip:"ركبتين على الأرض، الكابل من الأعلى بالحبل. الحركة من الظهر — مش من الرقبة. ركز تحس بالبطن يتضغط عند كل تكرار. لا تستخدم الزخم.", youtube:"https://www.youtube.com/watch?v=Xyd_fa5zoEU" },
+      { name:"Cable Woodchop", nameAr:"قطع الخشب بالكابل", equipment:"كابل", sets:"3 سيت", reps:"12 تكرار / جهة", rest:"30 ث راحة", muscle:"الكور الجانبي — الأوبليك", tip:"الكابل من الأعلى — اسحب بشكل قطري من الكتف للركبة المعاكسة. تمرين ممتاز للكور الجانبي والتنشيف. نفذه على الجهتين.", youtube:"https://www.youtube.com/watch?v=pAplQXy_V3E" },
+      { name:"Hanging Knee Raise", nameAr:"رفع الركبتين من الشنق", equipment:"ماكينة", sets:"3 سيت", reps:"12-15 تكرار", rest:"30 ث راحة", muscle:"البطن السفلي", tip:"استخدم جهاز الـ Dip الموجود في جيمك. ارفع الركبتين للصدر ببطء. لا تتأرجح. عند الأعلى اضغط البطن. ارجع ببطء.", youtube:"https://www.youtube.com/watch?v=hdng3Nm1x_E" }
+    ]
+  },
+  {
+    id:"tue", label:"🦾 الثلاثاء", title:"كتف", subtitle:"Shoulders",
+    emoji:"🦾", color:"#3498db", bg:"rgba(52,152,219,0.08)", border:"rgba(52,152,219,0.3)", tag:"يوم ٤",
+    exercises:[
+      { name:"Shoulder Press Machine", nameAr:"ماكينة ضغط الكتف", equipment:"ماكينة", sets:"4 سيت", reps:"10-12 تكرار", rest:"60 ث راحة", muscle:"الكتف الكامل", tip:"ضبط المقعد: المقابض تكون على مستوى الأذن. ادفع للأعلى بشكل مستقيم — لا تقفل المرفق. ارجع ببطء لتمدد كامل للكتف.", youtube:"https://www.youtube.com/watch?v=qEwKCR5JCog" },
+      { name:"Cable Lateral Raise", nameAr:"رفع جانبي بالكابل", equipment:"كابل", sets:"4 سيت", reps:"15 تكرار", rest:"45 ث راحة", muscle:"الرأس الجانبي للكتف", tip:"الكابل السفلي بيدك البعيدة. أفضل من الدمبل لأن الضغط ثابت طول الحركة. الجسم مستقيم — لا تميل. ارجع ببطء جداً.", youtube:"https://www.youtube.com/watch?v=PPmFmGAM_4E" },
+      { name:"Cable Front Raise", nameAr:"رفع أمامي بالكابل", equipment:"كابل", sets:"3 سيت", reps:"12 تكرار", rest:"45 ث راحة", muscle:"الرأس الأمامي للكتف", tip:"الكابل من الأسفل خلفك. ارفع للأمام لمستوى الكتف فقط — فوق كده يشغّل الظهر. الحركة بطيئة جداً عند الرجوع للأسفل.", youtube:"https://www.youtube.com/watch?v=gkfHMnaGBqw" },
+      { name:"Rear Delt Machine", nameAr:"ماكينة الكتف الخلفي", equipment:"ماكينة", sets:"3 سيت", reps:"15 تكرار", rest:"45 ث راحة", muscle:"الرأس الخلفي للكتف", tip:"اعكس الإعداد على ماكينة Pec Deck — وجهك للماكينة. هذه العضلة مهمة للشكل المتكامل وتصحيح وضعية الظهر. لا تتجاهلها أبداً.", youtube:"https://www.youtube.com/watch?v=ttvfGg9d76c" },
+      { name:"Dumbbell Shrugs", nameAr:"شراجز بالدمبل", equipment:"دمبل", sets:"3 سيت", reps:"15 تكرار", rest:"45 ث راحة", muscle:"التراب — Trapezius", tip:"رف الدمبل موجود في جيمك. ارفع الكتفين للأعلى مباشرة — لا تدورهم دائري. ثبّت ثانية فوق لأقصى انقباض ثم انزل ببطء.", youtube:"https://www.youtube.com/watch?v=cJRVVxmytaM" }
+    ]
+  },
+  {
+    id:"wed", label:"🦵 الأربعاء", title:"رجل", subtitle:"Legs",
+    emoji:"🦵", color:"#9b59b6", bg:"rgba(155,89,182,0.08)", border:"rgba(155,89,182,0.3)", tag:"يوم ٥",
+    exercises:[
+      { name:"Leg Press Machine", nameAr:"ماكينة ضغط الرجل", equipment:"ماكينة", sets:"4 سيت", reps:"12 تكرار", rest:"75 ث راحة", muscle:"الرباعيات والأرداف", tip:"القدم في المنتصف — لا تنزل الركبة على الصدر أكثر من 90 درجة. الظهر ملاصق للمقعد دائماً. ادفع من الكعب مش من الأصابع.", youtube:"https://www.youtube.com/watch?v=IZxyjW7MPJQ" },
+      { name:"Hack Squat Machine", nameAr:"ماكينة هاك سكوات", equipment:"ماكينة", sets:"3 سيت", reps:"12 تكرار", rest:"60 ث راحة", muscle:"الرباعيات — التركيز الأمامي", tip:"جيمك فيه Hack Squat — أفضل من السكوات الحر للمبتدئ لأن الظهر محمي تماماً. القدمين على عرض الكتف. انزل ببطء وادفع من الكعب.", youtube:"https://www.youtube.com/watch?v=EdtPPSBuABk" },
+      { name:"Leg Extension Machine", nameAr:"ماكينة تمديد الرجل", equipment:"ماكينة", sets:"3 سيت", reps:"15 تكرار", rest:"60 ث راحة", muscle:"عزل الرباعيات", tip:"امسك الوزن ثانية عند الأعلى — ثم ارجع ببطء. لا تستخدم الزخم. يعزل الرباعيات بشكل كامل ويكمل بعد Leg Press.", youtube:"https://www.youtube.com/watch?v=YyvSfVjQeL0" },
+      { name:"Lying Leg Curl Machine", nameAr:"ماكينة ثني الرجل من الاستلقاء", equipment:"ماكينة", sets:"3 سيت", reps:"15 تكرار", rest:"60 ث راحة", muscle:"الهامسترينج — أوتار المأبض", tip:"لا ترفع الورك عن البنش — الحركة من الركبة فقط. عند الأعلى اضغط العضلة. ارجع ببطء للأسفل — هنا تكبر العضلة.", youtube:"https://www.youtube.com/watch?v=Orxowest56U" },
+      { name:"Standing Calf Raise Machine", nameAr:"ماكينة رفع الكعب واقف", equipment:"ماكينة", sets:"4 سيت", reps:"20 تكرار", rest:"30 ث راحة", muscle:"الكالف", tip:"ارفع على أصابعك بالكامل واثبت ثانية فوق. ثم انزل تحت مستوى المنصة لتمديد كامل. الكالف يحتاج نطاق حركة كامل للنمو — لا تقصّر الحركة.", youtube:"https://www.youtube.com/watch?v=-M4-G8p1fCI" }
+    ]
+  }
+];
+
+const tips = [
+  { icon:"🥩", title:"البروتين", text:"1.5-2 جرام × وزنك يومياً" },
+  { icon:"💧", title:"المياه", text:"3 لتر+ يومياً في الدوحة" },
+  { icon:"📈", title:"Progressive Overload", text:"زد الوزن تدريجياً كل أسبوعين" },
+  { icon:"😴", title:"النوم", text:"7-8 ساعات — فيها العضلة تكبر" }
+];
+
+let activeDay = 0;
+let openEx = null;
+
+function render() { renderTabs(); renderContent(); }
+
+function renderTabs() {
+  document.getElementById('tabs').innerHTML = days.map((d, i) => `
+    <button class="tab-btn ${i===activeDay?'active':''}"
+      style="${i===activeDay?`background:${d.color};border-bottom-color:${d.color};`:''}"
+      onclick="switchDay(${i})">${d.label}</button>
+  `).join('');
+}
+
+function renderContent() {
+  const d = days[activeDay];
+  const exHTML = d.exercises.map((ex, i) => {
+    const ec = equipColor[ex.equipment] || '#888';
+    const isOpen = openEx === i;
+    const stats = [ex.sets, ex.reps, ex.rest].filter(s => s !== '—');
+    return `
+      <div class="ex-card" id="ex-${i}" style="${isOpen?`border-color:${d.border}`:''}">
+        <div class="ex-header" onclick="toggleEx(${i})">
+          <div class="ex-num" style="background:${d.bg};border-color:${d.border};color:${d.color}">${i+1}</div>
+          <div class="ex-info">
+            <div class="ex-name-row">
+              <span class="ex-name">${ex.name}</span>
+              <span class="equip-badge" style="background:${ec}22;color:${ec};border-color:${ec}44">${ex.equipment}</span>
+            </div>
+            <div class="ex-name-ar">${ex.nameAr} · ${ex.muscle}</div>
+            <div class="stats-row">${stats.map(s=>`<span class="stat-pill">${s}</span>`).join('')}</div>
+          </div>
+          <span class="ex-arrow ${isOpen?'open':''}">▾</span>
+        </div>
+        <div class="ex-body ${isOpen?'open':''}">
+          <div class="tip-box"><span>💡</span><p>${ex.tip}</p></div>
+          <a class="yt-btn" href="${ex.youtube}" target="_blank" rel="noreferrer">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="white" style="flex-shrink:0">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+            شاهد فيديو الأداء الصحيح على يوتيوب
+          </a>
+        </div>
+      </div>`;
+  }).join('');
+
+  const legendHTML = Object.entries(equipColor).map(([k,v])=>
+    `<span class="legend-item" style="background:${v}18;color:${v};border-color:${v}33">${k}</span>`
+  ).join('');
+
+  const tipsHTML = tips.map(t=>`
+    <div class="tip-card">
+      <span class="tip-card-icon">${t.icon}</span>
+      <div><div class="tip-card-title">${t.title}</div><div class="tip-card-text">${t.text}</div></div>
+    </div>`).join('');
+
+  document.getElementById('content').innerHTML = `
+    <div class="day-title-card" style="background:${d.bg};border-color:${d.border}">
+      <span class="day-emoji">${d.emoji}</span>
+      <div class="day-text"><h2>${d.title}</h2><p>${d.subtitle} · ${d.exercises.length} تمارين</p></div>
+      <span class="day-tag" style="background:${d.color}">${d.tag}</span>
+    </div>
+    ${exHTML}
+    <div class="legend"><div class="legend-title">دليل الألوان — نوع الجهاز</div><div class="legend-items">${legendHTML}</div></div>
+    <div class="tips-grid">${tipsHTML}</div>`;
+}
+
+function switchDay(i) {
+  activeDay = i; openEx = null; render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleEx(i) {
+  openEx = openEx === i ? null : i;
+  renderContent();
+  setTimeout(() => {
+    if (openEx === i) {
+      const el = document.getElementById('ex-' + i);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, 50);
+}
+
+render();
+</script>
+</body>
+</html>
